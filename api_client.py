@@ -1,16 +1,14 @@
 
 import requests
 
-name = input("Enter your first name: ")
-
-url = "https://agagdangerich.onrender.com/hello"
-
-params = {"name": name}
-response = requests.get(url, params=params)
+url = "https://agagdangerich.onrender.com/course"
+response = requests.get(url)
 
 if response.status_code == 200:
     data = response.json()
-    print(data["message"])
+    print("Program:", data["program"])
+    print("Section:", data["section"])
+    print("Year:", data["year"])
 else:
     print("Request failed.")
     print("Status Code:", response.status_code)
