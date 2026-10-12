@@ -1,17 +1,17 @@
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 
 app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "Welcome to my first API! Erich Agagdang"
+    return render_template('index.html')
 
 @app.route('/student')
 def get_student():
     return jsonify({
-        "student_id": "24-00316",
-        "name": "Erich Agagdang",
+        "student_id": "2026-00123",
+        "name": "Erich",
         "program": "BSIT",
         "year": 3,
         "section": "A"
@@ -22,14 +22,6 @@ def say_hello():
     name = request.args.get('name', 'Student')
     return jsonify({
         "message": f"Hello, {name}!"
-    })
-
-@app.route('/course')
-def get_course():
-    return jsonify({
-        "program": "BSIT",
-        "year": 3,
-        "section": "A"
     })
 
 if __name__ == '__main__':

@@ -1,0 +1,97 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student API Interface</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f3ff;
+            color: #333;
+        }
+
+        h1, h2 {
+            color: #6a5acd;
+        }
+
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+            background: #6a5acd;
+            color: white;
+            border: none;
+            border-radius: 6px;
+        }
+
+        input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        #result, #greeting {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Student API Interface</h1>
+
+    <h2>Student Information</h2>
+    <button onclick="loadStudent()">Load Student Information</button>
+    <div id="result">Click the button to load student information.</div>
+
+    <hr>
+
+    <h2>Greeting API</h2>
+    <input type="text" id="nameInput" placeholder="Enter your first name">
+    <button onclick="sayHello()">Say Hello</button>
+    <p id="greeting"></p>
+
+    <script>
+        function loadStudent() {
+            fetch('/student')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('result').innerHTML =
+                        '<p><b>Student ID:</b> ' + data.student_id + '</p>' +
+                        '<p><b>Name:</b> ' + data.name + '</p>' +
+                        '<p><b>Program:</b> ' + data.program + '</p>' +
+                        '<p><b>Year:</b> ' + data.year + '</p>' +
+                        '<p><b>Section:</b> ' + data.section + '</p>';
+                })
+                .catch(error => {
+                    document.getElementById('result').innerText =
+                        'Unable to retrieve data.';
+                });
+        }
+
+        function sayHello() {
+            const name = document.getElementById('nameInput').value;
+
+            fetch('/hello?name=' + encodeURIComponent(name))
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('greeting').innerText =
+                        data.message;
+                })
+                .catch(error => {
+                    document.getElementById('greeting').innerText =
+                        'Unable to retrieve greeting.';
+                });
+        }
+    </script>
+</body>
+</html>
