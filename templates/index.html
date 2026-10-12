@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Student API Interface</title>
 
     <style>
@@ -30,40 +31,87 @@
             border-radius: 6px;
         }
 
+        button:hover {
+            background: #5144a5;
+        }
+
         input {
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 6px;
         }
 
-        #result, #greeting {
-            margin-top: 20px;
+        #result, #greeting, #studentsResult {
+            margin-top: 15px;
             padding: 15px;
             background: white;
             border: 1px solid #ddd;
             border-radius: 8px;
         }
+
+        .student-card {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #faf9ff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
     </style>
 </head>
 
 <body>
+
     <h1>Student API Interface</h1>
 
+    <!-- Student Information -->
     <h2>Student Information</h2>
-    <button onclick="loadStudent()">Load Student Information</button>
-    <div id="result">Click the button to load student information.</div>
+
+    <button onclick="loadStudent()">
+        Load Student Information
+    </button>
+
+    <div id="result">
+        Click the button to load student information.
+    </div>
 
     <hr>
 
+    <!-- Greeting API -->
     <h2>Greeting API</h2>
-    <input type="text" id="nameInput" placeholder="Enter your first name">
+
+    <input
+        type="text"
+        id="nameInput"
+        placeholder="Enter your first name"
+    >
+
     <button onclick="sayHello()">Say Hello</button>
+
     <p id="greeting"></p>
 
+    <hr>
+
+    <!-- Students API - Additional Task -->
+    <h2>Students API</h2>
+
+    <p>Click below to retrieve the list of students from the Flask API.</p>
+
+    <button onclick="loadStudents()">Load Students</button>
+
+    <div id="studentsResult">
+        Click Load Students to display student records.
+    </div>
+
     <script>
+        // Load one student
         function loadStudent() {
             fetch('/student')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Request failed');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     document.getElementById('result').innerHTML =
                         '<p><b>Student ID:</b> ' + data.student_id + '</p>' +
@@ -74,15 +122,22 @@
                 })
                 .catch(error => {
                     document.getElementById('result').innerText =
-                        'Unable to retrieve data.';
+                        'Unable to retrieve student information.';
                 });
         }
 
+        // Greeting API
         function sayHello() {
-            const name = document.getElementById('nameInput').value;
+            const name =
+                document.getElementById('nameInput').value.trim();
 
             fetch('/hello?name=' + encodeURIComponent(name))
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Request failed');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     document.getElementById('greeting').innerText =
                         data.message;
@@ -92,6 +147,36 @@
                         'Unable to retrieve greeting.';
                 });
         }
+
+        // Load multiple students
+        function loadStudents() {
+            fetch('/students')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Request failed');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const container =
+                        document.getElementById('studentsResult');
+
+                    container.innerHTML = data.students.map(student => `
+                        <div class="student-card">
+                            <p><b>Student ID:</b> ${student.student_id}</p>
+                            <p><b>Name:</b> ${student.name}</p>
+                            <p><b>Program:</b> ${student.program}</p>
+                            <p><b>Year:</b> ${student.year}</p>
+                            <p><b>Section:</b> ${student.section}</p>
+                        </div>
+                    `).join('');
+                })
+                .catch(error => {
+                    document.getElementById('studentsResult').innerText =
+                        'Unable to retrieve student records.';
+                });
+        }
     </script>
+
 </body>
 </html>
