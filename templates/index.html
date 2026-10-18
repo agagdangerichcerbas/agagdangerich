@@ -10,7 +10,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 700px;
+            max-width: 800px;
             margin: 40px auto;
             padding: 20px;
             background: #f5f3ff;
@@ -19,6 +19,10 @@
 
         h1, h2 {
             color: #6a5acd;
+        }
+
+        h1 {
+            text-align: center;
         }
 
         button {
@@ -41,7 +45,9 @@
             border-radius: 6px;
         }
 
-        #result, #greeting, #studentsResult {
+        #result,
+        #greeting,
+        #studentsResult {
             margin-top: 15px;
             padding: 15px;
             background: white;
@@ -50,11 +56,25 @@
         }
 
         .student-card {
-            padding: 10px;
-            margin-bottom: 10px;
+            padding: 12px;
+            margin-bottom: 12px;
             background: #faf9ff;
-            border: 1px solid #ddd;
+            border: 1px solid #d8d0ff;
             border-radius: 6px;
+        }
+
+        .student-card p {
+            margin: 7px 0;
+        }
+
+        hr {
+            margin: 30px 0;
+            border: none;
+            border-top: 1px solid #ddd;
+        }
+
+        .status {
+            color: #5144a5;
         }
     </style>
 </head>
@@ -63,7 +83,7 @@
 
     <h1>Student API Interface</h1>
 
-    <!-- Student Information -->
+    <!-- STUDENT INFORMATION -->
     <h2>Student Information</h2>
 
     <button onclick="loadStudent()">
@@ -76,7 +96,7 @@
 
     <hr>
 
-    <!-- Greeting API -->
+    <!-- GREETING API -->
     <h2>Greeting API</h2>
 
     <input
@@ -87,14 +107,18 @@
 
     <button onclick="sayHello()">Say Hello</button>
 
-    <p id="greeting"></p>
+    <div id="greeting">
+        Enter your name and click Say Hello.
+    </div>
 
     <hr>
 
-    <!-- Students API - Additional Task -->
+    <!-- STUDENTS API -->
     <h2>Students API</h2>
 
-    <p>Click below to retrieve the list of students from the Flask API.</p>
+    <p>
+        Click below to retrieve student records from the Flask database.
+    </p>
 
     <button onclick="loadStudents()">Load Students</button>
 
@@ -103,78 +127,143 @@
     </div>
 
     <script>
-        // Load one student
-        function loadStudent() {
-            fetch('/student')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Request failed');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    document.getElementById('result').innerHTML =
-                        '<p><b>Student ID:</b> ' + data.student_id + '</p>' +
-                        '<p><b>Name:</b> ' + data.name + '</p>' +
-                        '<p><b>Program:</b> ' + data.program + '</p>' +
-                        '<p><b>Year:</b> ' + data.year + '</p>' +
-                        '<p><b>Section:</b> ' + data.section + '</p>';
-                })
-                .catch(error => {
-                    document.getElementById('result').innerText =
-                        'Unable to retrieve student information.';
-                });
+        // Helper function for API requests
+        async function fetchJSON(url) {
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error("Request failed: " + response.status);
+            }
+
+            return await response.json();
         }
 
-        // Greeting API
-        function sayHello() {
-            const name =
-                document.getElementById('nameInput').value.trim();
+        // LOAD ONE STUDENT
+        async function loadStudent() {
+            const result = document.getElementById("result");
 
-            fetch('/hello?name=' + encodeURIComponent(name))
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Request failed');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    document.getElementById('greeting').innerText =
-                        data.message;
-                })
-                .catch(error => {
-                    document.getElementById('greeting').innerText =
-                        'Unable to retrieve greeting.';
+            result.textContent = "Loading student information...";
+
+            try {
+                const data = await fetchJSON("/student");
+
+                result.replaceChildren();
+
+                const fields = [
+                    ["Student ID", data.student_id],
+                    ["Name", data.name],
+                    ["Program", data.program],
+                    ["Year", data.year],
+                    ["Section", data.section]
+                ];
+
+                fields.forEach(([label, value]) => {
+                    const p = document.createElement("p");
+                    const b = document.createElement("b");
+
+                    b.textContent = label + ": ";
+                    p.appendChild(b);
+                    p.appendChild(
+                        document.createTextNode(value ?? "N/A")
+                    );
+
+                    result.appendChild(p);
                 });
+            } catch (error) {
+                result.textContent =
+                    "Unable to retrieve student information.";
+                console.error(error);
+            }
         }
 
-        // Load multiple students
-        function loadStudents() {
-            fetch('/students')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Request failed');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    const container =
-                        document.getElementById('studentsResult');
+        // GREETING API
+        async function sayHello() {
+            const name = document
+                .getElementById("nameInput")
+                .value
+                .trim();
 
-                    container.innerHTML = data.students.map(student => `
-                        <div class="student-card">
-                            <p><b>Student ID:</b> ${student.student_id}</p>
-                            <p><b>Name:</b> ${student.name}</p>
-                            <p><b>Program:</b> ${student.program}</p>
-                            <p><b>Year:</b> ${student.year}</p>
-                            <p><b>Section:</b> ${student.section}</p>
-                        </div>
-                    `).join('');
-                })
-                .catch(error => {
-                    document.getElementById('studentsResult').innerText =
-                        'Unable to retrieve student records.';
+            const greeting = document.getElementById("greeting");
+
+            if (!name) {
+                greeting.textContent = "Please enter your name first.";
+                return;
+            }
+
+            greeting.textContent = "Loading greeting...";
+
+            try {
+                const data = await fetchJSON(
+                    "/hello?name=" + encodeURIComponent(name)
+                );
+
+                greeting.textContent =
+                    data.message ?? "Greeting received.";
+            } catch (error) {
+                greeting.textContent = "Unable to retrieve greeting.";
+                console.error(error);
+            }
+        }
+
+        // LOAD MULTIPLE STUDENTS
+        async function loadStudents() {
+            const container =
+                document.getElementById("studentsResult");
+
+            container.textContent = "Loading student records...";
+
+            try {
+                const data = await fetchJSON("/students");
+
+                const students = Array.isArray(data)
+                    ? data
+                    : data.students;
+
+                if (!Array.isArray(students)) {
+                    throw new Error(
+                        "Unexpected students API response format"
+                    );
+                }
+
+                container.replaceChildren();
+
+                if (students.length === 0) {
+                    container.textContent = "No student records found.";
+                    return;
+                }
+
+                students.forEach(student => {
+                    const card = document.createElement("div");
+                    card.className = "student-card";
+
+                    const fields = [
+                        ["Student ID", student.student_id],
+                        ["Name", student.name],
+                        ["Program", student.program],
+                        ["Year", student.year],
+                        ["Section", student.section]
+                    ];
+
+                    fields.forEach(([label, value]) => {
+                        const p = document.createElement("p");
+                        const b = document.createElement("b");
+
+                        b.textContent = label + ": ";
+                        p.appendChild(b);
+                        p.appendChild(
+                            document.createTextNode(value ?? "N/A")
+                        );
+
+                        card.appendChild(p);
+                    });
+
+                    container.appendChild(card);
                 });
+            } catch (error) {
+                container.textContent =
+                    "Unable to retrieve student records.";
+                console.error("Students API error:", error);
+            }
         }
     </script>
 
