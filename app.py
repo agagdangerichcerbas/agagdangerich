@@ -563,3 +563,4 @@ init_db()
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
+ # Updated for Laboratory Activity 10 - AWS Deployment
